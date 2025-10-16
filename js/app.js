@@ -1,47 +1,45 @@
-const taskInput = document.getElementById('taskInput');
-const taskList = document.getElementById('taskList');
-let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+let lista = document.getElementById("lista");
+let input = document.getElementById("tarea");
+let boton = document.getElementById("btnAgregar");
 
-function render() {
-    taskList.innerHTML = tasks.map((task, i) => `
-        <li class="${task.completed ? 'completed' : ''}" data-index="${i}">
-            ${task.text}
-            <button onclick="deleteTask(${i})">Eliminar</button>
-        </li>`
-    ).join('');
-    
-    document.querySelectorAll('li').forEach(li => {
-        li.onclick = (e) => {
-            if (e.target.tagName !== 'BUTTON') {
-                const i = li.dataset.index;
-                tasks[i].completed = !tasks[i].completed;
-                save();
-                render();
-            }
-        };
-    });
-}
+// Leer tareas guardadas (si existen)
+let tareas = JSON.parse(localStorage.getItem("tareas")) || [];
 
-function save() {
-    localStorage.setItem('tasks', JSON.stringify(tasks));
-}
+// Función para mostrar las tareas
+function mostrarTareas() {
+    lista.innerHTML = "";
+    for (let i = 0; i < tareas.length; i++) {
+        let li = document.createElement("li");
+        li.textContent = tareas[i].texto;
 
-function addTask() {
-    const text = taskInput.value.trim();
-    if (text) {
-        tasks.push({ text, completed: false });
-        taskInput.value = '';
-        save();
-        render();
+        if (tareas[i].hecho) {
+            li.classList.add("completada");
+        }
+
+        li.onclick = function() {
+            tareas[i].hecho = !tareas[i].hecho; // cambia de hecho a no hecho
+            guardar();
+            mostrarTareas();
+        }
+
+        lista.appendChild(li);
     }
 }
 
-function deleteTask(i) {
-    tasks.splice(i, 1);
-    save();
-    render();
+// Guardar en localStorage
+function guardar() {
+    localStorage.setItem("tareas", JSON.stringify(tareas));
 }
 
-document.getElementById('addTask').onclick = addTask;
-taskInput.onkeypress = e => e.key === 'Enter' && addTask();
-render();
+// Al hacer clic en el botón, agrega la tarea
+boton.onclick = function() {
+    if (input.value !== "") {
+        tareas.push({ texto: input.value, hecho: false });
+        input.value = "";
+        guardar();
+        mostrarTareas();
+    }
+};
+
+// Mostrar tareas al cargar la página
+mostrarTareas();
